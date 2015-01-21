@@ -19,24 +19,18 @@ my %notes = C => 261.63e0, Cs => 277.18e0, D => 293.66e0, Ds => 311.13e0,
             Gs => 415.30e0, A => 440.00e0, As => 466.16e0, B => 493.88e0;
 
 sub maj($in) { 
-    my $root = %num-to-Notes{$in};
-    my $third = %num-to-Notes{($in + 4) % 12};
-    my $fifth = %num-to-Notes{($in + 7) % 12};
-    %notes{$root.key}, %notes{$third.key}, %notes{$fifth.key};
+    my ($root, $third, $fifth) = $num-to-Notes{$in, ($in + 4) % 12, ($in + 7) % 12};
+    %notes{$root.key, $third.key, $fifth.key};
 }
 
 sub min($in) { 
-    my $root = %num-to-Notes{$in};
-    my $third = %num-to-Notes{($in + 3) % 12};
-    my $fifth = %num-to-Notes{($in + 7) % 12};
-    %notes{$root.key}, %notes{$third.key}, %notes{$fifth.key};
+    my ($root, $third, $fifth) = $num-to-Notes{$in, ($in + 3) % 12, ($in + 7) % 12};
+    %notes{$root.key, $third.key, $fifth.key};
 }
 
 sub dim($in) {
-    my $root = %num-to-Notes{$in};
-    my $third = %num-to-Notes{($in + 3) % 12};
-    my $fifth = %num-to-Notes{($in + 6) % 12};
-    %notes{$root.key}, %notes{$third.key}, %notes{$fifth.key};
+    my ($root, $third, $fifth) = $num-to-Notes{$in, ($in + 3) % 12, ($in + 6) % 12};
+    %notes{$root.key, $third.key, $fifth.key};
 }
 
 my %scale{Any} = Notes::C => &maj, 
