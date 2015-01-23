@@ -7,6 +7,8 @@ use com::jsyn::instruments::JSynInstrumentLibrary:from<Java>:jar<jsyn-20150105.j
 use com::jsyn::unitgen::SawtoothOscillatorDPW:from<Java>:jar<jsyn-20150105.jar>;
 use com::jsyn::unitgen::LineOut:from<Java>:jar<jsyn-20150105.jar>;
 
+use eigmip6;
+
 enum Notes <C Cs D Ds E F Fs G Gs A As B>;
 subset Note of Int where 0 <= * <= 11;
 my %num-to-Notes = 0 => Notes::C, 1 => Notes::Cs, 2 => Notes::D,
