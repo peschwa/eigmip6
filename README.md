@@ -2,15 +2,15 @@
 
 ## DISCLAIMER
 
-I'm dabbling. The current state works as described below, but the implementation of this Module are not state of the art. There will likely be noticeable jittering in playback in the current state. Also, it's probably rather loud.
+I'm dabbling. The current state works as described below, but the implementation of this module is far from finished. There will likely be noticeable jittering in playback in the current state. Also, it's probably rather loud.
 
 ## What?
 
-This repository contains my humble attempts at building something along the lines of [Extempore](https://github.com/digego/extempore) or [SuperCollider](http://supercollider.sourceforge.net/) in Perl 6, albeit (in contrast to Extempore at least) focused on music. The name is admittedly badly chosen, seeing as neither Extempore nor SuperCollider limit themselves to [generative Music](http://en.wikipedia.org/wiki/Generative_music), but pride themselves with being useful for [live coding](http://en.wikipedia.org/wiki/Live_coding), which I am trying to emulate.
+This repository contains my humble attempts at building something along the lines of [Extempore](https://github.com/digego/extempore) or [SuperCollider](http://supercollider.sourceforge.net/) in Perl 6, albeit (in contrast to Extempore at least) focused on music. The name is admittedly badly chosen, seeing as neither Extempore nor SuperCollider limit themselves to [generative music](http://en.wikipedia.org/wiki/Generative_music), but pride themselves with being useful for [live coding](http://en.wikipedia.org/wiki/Live_coding), which I am trying to emulate.
 
 ## OK, what's possible?
 
-Currently eigmip6 supports only the JVM backend of [Rakudo](http://www.rakudo.org). Running eigmip6 works with the following command line execute from the root of this repository
+At the moment eigmip6 supports only the JVM backend of [Rakudo](http://www.rakudo.org). Running eigmip6 works with the following command line execute from the root of this repository
 
     CLASSPATH=3rdparty/jportaudio.jar:3rdparty/jsyn-20150105.jar perl6-j -Ilib -Meigmip6
 
@@ -20,9 +20,13 @@ assuming you have a Rakudo release 2015.01 or newer built for JVM in your path.
 
 eigmip6 currently exports exactly two subs, two types and an enum. (This is likely to change.) The subs exported are `&setGlobalTiming(Num)` and `&getNoteChannel(Num)`.
 
-`&setGlobalTiming(Num)` takes a Num (write literals with scientific notation or coerce with .Num) and sets a global timing for synchronisation of note channels. This function currently always returns `True`.
+`&setGlobalTiming(Num)` takes a Num (write literals with scientific notation or coerce with .Num) and sets a global timing for synchronisation of note channels. This function at present always returns `True`.
 
-`&getNoteChannel(Num)` takes an interval in milliseconds and creates a Supply which pulls data (i.e. frequencies) from a Channel. This Channel is returned and can be filled with frequency data by the user with `Channel.send()`. Note that incoming data is coerced to Num internally. 
+`&getNoteChannel(Num)` takes an interval in milliseconds and creates a Supply which pulls data (i.e. frequencies) from a Channel. This Channel is returned and can be filled with frequency data by the user with the `.send()` method. Note that incoming data is coerced to Num internally. 
+
+The exported enum is `Notes`, containing the Str literals `C Db D Eb E F Gb G Ab A Bb B`, which correspond to western musical notation.
+
+The two types currently exported are `eigmip6::Note` and `eigmip6::Scale`. Suffice it to say that `Note` takes `:name` and `:freq`, the former is expected to be an element of the enum `Notes`, the latter a `Num`. `Scale` takes a `:root`, which has to be a `Note` and `:steps` which has to be an array of note steps that make the scale *including a 0 step as the first step* except if you want to leave out the root for some reason.
 
 An example session:
 
@@ -37,9 +41,5 @@ An example session:
     Promise.new(scheduler => ThreadPoolScheduler.new(initial_threads => 0, max_threads => 16, uncaught_handler => Callable), status => PromiseStatus::Planned)
     >
 
-The above is a transcript of feeding a lazy infinite list consisting of the Numeric literal 440 alternating with the type Any into a freshly created note channel. Running this example on your machine should, provided a working audio interface exists and is not otherwise occupied, result in playback of 1 second of a 440hz sawtooth synth, followed by 1 seconds, repeating.
-
-The exported enum is `Notes`, which contains the Str literals `C Db D Eb E F Gb G Ab A Bb B`, which correspond to western musical notation.
-
-The two types currently exported are `eigmip6::Note` and `eigmip6::Scale`. I am still internally debating their usefulness, although some level of abstraction definitely has to exist. Throwing Num literals around isn't fun, and generating scales via closures that `return $_ * 2 ** (@scale-steps.pop / 12 )` is unwieldy as well. Suffice it to say that `Note` takes `:name` and `:freq`, the former is expected to be an element of the enum `Notes`, the latter a `Num`. `Scale` takes a `:root`, which has to be a `Note` and `:steps` which has to be an array of note steps that make the scale *including a 0 step as the first step* except if you want to leave out the root for some reason.
+The above is a transcript of feeding a lazy infinite list consisting of the Numeric literal 440 alternating with the type Any into a freshly created note channel. Reproducing this example on your machine should, provided a working audio interface exists and is not otherwise occupied, result in playback of 1 second of a 440hz sawtooth synth, followed by 1 second of silence, repeating.
 
