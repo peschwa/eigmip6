@@ -70,7 +70,7 @@ class Scale is export {
         ?? @!notes-cache
         !! gather { 
             say "in do";
-            for [\+] (0, @.steps) {
+            for [\+] @.steps {
                 @!notes-cache.push: $.root + $_;
             }
             @!notes-cache
@@ -79,7 +79,7 @@ class Scale is export {
 ]]
 
     method !slot(Note $note) {
-        ($.root.name - $note.name + @.steps) % @.steps;
+        (($.root.name - $note.name + @.steps) % @.steps) + 1;
     }
 
     method succ-note(Note $note) {
@@ -87,7 +87,7 @@ class Scale is export {
     }
 
     method pred-note(Note $note) {
-        $note + @.steps[self!slot($note)];
+        $note - @.steps[self!slot($note)];
     }
 
     method tritone(Note $root) {
@@ -122,7 +122,6 @@ sub setGlobalTiming(Num $timing) is export {
         $supp.tap( -> $s {
                 my $val = $pre-sync-chan.poll;
                 $post-sync-chan.send($val) if $val;
-                say "sync supp not closed";
             }
         )
     }
@@ -153,7 +152,6 @@ sub getNoteChannel (Num $update-interval = 1e0) is export {
         @supps.push: $supp;
         $supp.tap(
         -> $s {
-            say "note supp not closed";
             $osc.noteOff;
             my $note = $chan.poll;
             $osc.noteOn($note.Num, 1e0) if $note;
