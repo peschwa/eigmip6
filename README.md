@@ -2,7 +2,7 @@
 
 ## DISCLAIMER
 
-I'm dabbling. The current state works as described below, but the implementation of this module is far from finished. There will likely be noticeable jittering in playback in the current state. Also, it's probably rather loud.
+I'm dabbling. The current state works as described below, but the implementation of this module is far from finished. There will likely be noticeable jittering in playback in the current state. Also, it's probably rather loud. Also you currently probably have to terminate a Perl 6 REPL running with eigmip6 with ^C instead of ^D.
 
 ## What?
 
