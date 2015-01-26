@@ -17,8 +17,8 @@ class Note is export {
 
 #`[[ not yet sure if this is actually useful
     method succ {
-        my $newname = $.name.value == 11 
-            ?? Notes::C 
+        my $newname = $.name.value == 11
+            ?? Notes::C
             !! Notes($.name.value + 1);
         my $newfreq = $.freq * 13/12;
         Note.new(:name($newname), :freq($newfreq));
@@ -37,7 +37,7 @@ class Note is export {
 
 multi infix:<+>(Note $lhs, Int $rhs) is export {
     Note.new(
-        :name(Notes(($lhs.name + $rhs) % 12)), 
+        :name(Notes(($lhs.name + $rhs) % 12)),
         :freq(round($lhs.freq * 2 ** ($rhs / 12), 0.01).Num)
     );
 }
@@ -66,9 +66,9 @@ class Scale is export {
     method notes {
         say "in notes";
         say @!notes-cache.defined;
-        @!notes-cache.elems == @.steps + 1 
+        @!notes-cache.elems == @.steps + 1
         ?? @!notes-cache
-        !! gather { 
+        !! gather {
             say "in do";
             for [\+] @.steps {
                 @!notes-cache.push: $.root + $_;
@@ -92,13 +92,12 @@ class Scale is export {
 
     method tritone(Note $root) {
         my $slot = self!slot($root);
-        $root, 
+        $root,
         $root + [+] @.steps[$slot..($slot + 2)],
         $root + [+] @.steps[$slot..($slot + 4)],
     }
 }
 
-# boilerplate starts here
 my $lineout = LineOut.new;
 my $synth = JSyn.createSynthesizer;
 
@@ -139,24 +138,29 @@ sub getNoteChannel (Num $update-interval = 1e0) is export {
     my $osc = SawtoothOscillatorDPW.new;
     $synth.add( $osc );
 
+    $osc.get_amplitude.set(0e0);
+
     $osc.get_output.connect( 0, $lineout.get_input, 0);
     $osc.get_output.connect( 0, $lineout.get_input, 1);
 
     $osc.get_amplitude.set(0.5e0);
-    $osc.start;
 
     $pre-sync-chan.send(True);
     $post-sync-chan.receive;
-    @promises.push: start { 
+    @promises.push: start {
         my $supp = Supply.interval($update-interval);
         @supps.push: $supp;
         $supp.tap(
         -> $s {
             $osc.noteOff;
             my $note = $chan.poll;
-            $osc.noteOn($note.Num, 1e0) if $note;
+            # XXX: this is very hiding-what-we're-doing, maybe revisit
+            my $freq = $note.?freq // $note.?Num;
+            $osc.noteOn($freq, 1e0) if $note;
         }
     )};
+
+    $osc.start;
 
     $chan;
 }
@@ -167,4 +171,6 @@ sub closeAll is export {
     $pre-sync-chan.close;
     $post-sync-chan.close;
     await $_ for @promises;
+
+    $synth.stop;
 }
